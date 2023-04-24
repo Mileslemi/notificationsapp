@@ -59,7 +59,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging fMessaging = FirebaseMessaging.instance;
-
+  // how do we handle receiving notif when app is terminated, background, or foreground
   Future<void> getFireBaseMessagingToken() async {
     await fMessaging.requestPermission();
 
