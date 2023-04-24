@@ -60,6 +60,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging fMessaging = FirebaseMessaging.instance;
   // how do we handle receiving notif when app is terminated, background, or foreground
+  // maybe on foreground we can set veibrate and tone only
+  //while background and terminated show notification on top
+  // what if no internet connection, how will we handle that
+  // maybe we can listne to notification received, and if successfully received on app
+  // send back saying to app saying true - messages delivered
   Future<void> getFireBaseMessagingToken() async {
     await fMessaging.requestPermission();
 
