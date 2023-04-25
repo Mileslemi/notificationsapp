@@ -2,18 +2,78 @@ import 'dart:developer' as developer;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
 Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await setupFlutterNotification();
+  showFlutterNotification(message);
   developer.log('handling thisss background msg');
+}
+
+late AndroidNotificationChannel channel;
+
+bool isFlutterNotificationInitialized = false;
+
+late FlutterLocalNotificationsPlugin flnp;
+
+Future<void> setupFlutterNotification() async {
+  if (isFlutterNotificationInitialized) {
+    return;
+  }
+
+  channel = const AndroidNotificationChannel(
+    'unique_channel_id',
+    'unique_channel_title',
+    playSound: true,
+    importance: Importance.high,
+  );
+
+  flnp = FlutterLocalNotificationsPlugin();
+
+  await flnp
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  isFlutterNotificationInitialized = true;
+}
+
+void showFlutterNotification(RemoteMessage message) {
+  RemoteNotification? notif = message.notification;
+  AndroidNotification? android = message.notification?.android;
+  if (notif != null && android != null && !kIsWeb) {
+    flnp.show(
+        notif.hashCode,
+        notif.title,
+        notif.body,
+        NotificationDetails(
+            android: AndroidNotificationDetails(
+          channel.id,
+          channel.name,
+          // add an app icon for notifications
+          // icon: ''
+        )));
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+
+  if (!kIsWeb) {
+    // if not run on web
+    await setupFlutterNotification();
+  }
 
   runApp(const MyApp());
 }
@@ -99,8 +159,8 @@ class _MyAppState extends State<MyApp> {
 
       if (message.notification != null) {
         developer.log("Message notification: ${message.notification?.body}");
-        //  vibrate on receivng notification
-        HapticFeedback.heavyImpact();
+
+        showFlutterNotification(message);
       }
     });
 
