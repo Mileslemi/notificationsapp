@@ -5,9 +5,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+@pragma('vm:entry-point')
+Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+  developer.log('handling thisss background msg');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 
   runApp(const MyApp());
 }
@@ -25,8 +31,15 @@ class MyApp extends StatefulWidget {
 //     server_key = "server key"
 //     headers = {"Content-Type":"application/json","Authorization":"key=%s" % server_key}
 
-//     body = {
+// body = {
 //         "to":to_token,
+// you can set data variables/read more on this
+//         "data": {
+//             "click_action": "FLUTTER_NOTIFICATION_CLICK",
+//             "notification_priority": "PRIORITY_HIGH",
+//             "sound": "default",
+//             "ttl": 60
+//           },
 //         "notification":{
 //             "title":msgTitle,
 //             "body":msgBody,
@@ -68,7 +81,11 @@ class _MyAppState extends State<MyApp> {
   // send back saying to app saying true - messages delivered
   Future<void> getFireBaseMessagingToken() async {
     NotificationSettings notificationSettings =
-        await fMessaging.requestPermission();
+        await fMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     developer.log("${notificationSettings.authorizationStatus}");
 
@@ -85,6 +102,11 @@ class _MyAppState extends State<MyApp> {
         //  vibrate on receivng notification
         HapticFeedback.heavyImpact();
       }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      developer.log("message opened");
+      //jump to chat page
     });
   }
 
