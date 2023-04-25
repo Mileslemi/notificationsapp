@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,10 +67,24 @@ class _MyAppState extends State<MyApp> {
   // maybe we can listne to notification received, and if successfully received on app
   // send back saying to app saying true - messages delivered
   Future<void> getFireBaseMessagingToken() async {
-    await fMessaging.requestPermission();
+    NotificationSettings notificationSettings =
+        await fMessaging.requestPermission();
+
+    developer.log("${notificationSettings.authorizationStatus}");
 
     await fMessaging.getToken().then((value) {
       developer.log("Push Token: $value");
+    });
+
+    //listen if there is a message
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      developer.log("Message data: ${message.data}");
+
+      if (message.notification != null) {
+        developer.log("Message notification: ${message.notification?.body}");
+        //  vibrate on receivng notification
+        HapticFeedback.heavyImpact();
+      }
     });
   }
 
