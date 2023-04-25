@@ -18,8 +18,6 @@ late AndroidNotificationChannel channel;
 
 bool isFlutterNotificationInitialized = false;
 
-late FlutterLocalNotificationsPlugin flnp;
-
 Future<void> setupFlutterNotification() async {
   if (isFlutterNotificationInitialized) {
     return;
@@ -56,14 +54,13 @@ void showFlutterNotification(RemoteMessage message) {
         notif.title,
         notif.body,
         NotificationDetails(
-            android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          // add an app icon for notifications
-          // icon: ''
-        )));
+            android: AndroidNotificationDetails(channel.id, channel.name,
+                // add an app icon for notifications
+                icon: 'mipmap/ic_launcher')));
   }
 }
+
+late FlutterLocalNotificationsPlugin flnp;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,7 +91,8 @@ class MyApp extends StatefulWidget {
 // body = {
 //         "to":to_token,
 // you can set data variables/read more on this
-//         "data": {
+
+// "data": { #don't use this part if notif is to be received while app is teminated
 //             "click_action": "FLUTTER_NOTIFICATION_CLICK",
 //             "notification_priority": "PRIORITY_HIGH",
 //             "sound": "default",
