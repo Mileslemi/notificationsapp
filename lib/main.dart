@@ -14,7 +14,7 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
   developer.log('handling thisss background msg');
 }
 
-late AndroidNotificationChannel channel;
+// late AndroidNotificationChannel channel;
 
 bool isFlutterNotificationInitialized = false;
 
@@ -23,20 +23,30 @@ Future<void> setupFlutterNotification() async {
     return;
   }
 
-  channel = const AndroidNotificationChannel(
-    'unique_channel_id',
-    'unique_channel_title',
-    playSound: true,
-    importance: Importance.high,
-  );
+  // channel = const AndroidNotificationChannel(
+  //   'unique_channel_id',
+  //   'unique_channel_title',
+  //   playSound: true,
+  //   importance: Importance.high,
+  // );
 
   flnp = FlutterLocalNotificationsPlugin();
 
-  await flnp
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+  // ....
 
+  var android = const AndroidInitializationSettings('@mipmap/ic_launcher');
+  var iOS = const DarwinInitializationSettings();
+
+  var initSettings = InitializationSettings(android: android, iOS: iOS);
+
+  flnp.initialize(initSettings);
+
+  // await flnp
+  //     .resolvePlatformSpecificImplementation<
+  //         AndroidFlutterLocalNotificationsPlugin>()
+  //     ?.createNotificationChannel(channel);
+
+//  Sets the presentation options for Apple notifications when received in the foreground.
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
@@ -47,16 +57,16 @@ Future<void> setupFlutterNotification() async {
 
 void showFlutterNotification(RemoteMessage message) {
   RemoteNotification? notif = message.notification;
-  AndroidNotification? android = message.notification?.android;
-  if (notif != null && android != null && !kIsWeb) {
-    flnp.show(
-        notif.hashCode,
-        notif.title,
-        notif.body,
-        NotificationDetails(
-            android: AndroidNotificationDetails(channel.id, channel.name,
-                // add an app icon for notifications
-                icon: 'mipmap/ic_launcher')));
+  // AndroidNotification? android = message.notification?.android;
+
+  var android = const AndroidNotificationDetails('unique_id', 'unique_name',
+      priority: Priority.high, importance: Importance.high);
+
+  var iOs = const DarwinNotificationDetails();
+
+  var platform = NotificationDetails(android: android, iOS: iOs);
+  if (notif != null && !kIsWeb) {
+    flnp.show(notif.hashCode, notif.title, notif.body, platform);
   }
 }
 
