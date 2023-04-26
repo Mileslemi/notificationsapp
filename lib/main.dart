@@ -11,7 +11,7 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
   await setupFlutterNotification();
   showFlutterNotification(message);
-  developer.log('handling thisss background msg');
+  developer.log("handling thisss background msg: ${message.data['notifId']}");
 }
 
 // late AndroidNotificationChannel channel;
@@ -99,18 +99,15 @@ class MyApp extends StatefulWidget {
 //     headers = {"Content-Type":"application/json","Authorization":"key=%s" % server_key}
 
 // body = {
-//         "to":to_token,
+//         "to":to_token, can also be a list ["token_1","token_2"]
 // you can set data variables/read more on this
-
-// "data": { #don't use this part if notif is to be received while app is teminated
-//             "click_action": "FLUTTER_NOTIFICATION_CLICK",
-//             "notification_priority": "PRIORITY_HIGH",
-//             "sound": "default",
-//             "ttl": 60
+// "data": {
+//  "notifId":"thenotifId"
 //           },
 //         "notification":{
 //             "title":msgTitle,
 //             "body":msgBody,
+//             "imageUrl": "https...." #can send image  plus notif
 //         }
 //     }
 
@@ -163,10 +160,11 @@ class _MyAppState extends State<MyApp> {
 
     //listen if there is a message
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      developer.log("Message data: ${message.data}");
+      developer.log("Message data: ${message.data['notifId']}");
 
       if (message.notification != null) {
-        developer.log("Message notification: ${message.notification?.body}");
+        developer
+            .log("Message notification body: ${message.notification?.body}");
 
         showFlutterNotification(message);
       }
